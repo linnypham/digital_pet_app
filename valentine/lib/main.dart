@@ -122,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       alignment: Alignment.topRight,
                       child: ConfettiWidget(
                         confettiController: _controllerTopRight,
-                        blastDirection: 135,
+                        blastDirection: 105,
                         emissionFrequency: 0.1,
                         numberOfParticles: 10,
                         gravity: 0.1,
