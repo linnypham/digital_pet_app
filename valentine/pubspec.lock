@@ -41,8 +41,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   confetti:
     dependency: "direct main"
     description:
@@ -51,10 +49,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.8.0"
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   cupertino_icons:
     dependency: "direct main"
     description:
