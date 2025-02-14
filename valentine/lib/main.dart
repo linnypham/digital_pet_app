@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:confetti/confetti.dart';
+import 'dart:async';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
@@ -26,6 +28,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late AnimationController motionController;
   late Animation<double> motionAnimation;
+
+  //Confetti
+  late ConfettiController _controllerTopLeft;
+  late ConfettiController _controllerTopRight;
+
+  //timer
+  Timer? _timer;
+  int _countdown = 10;
 
   @override
   void initState() {
@@ -50,11 +60,33 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         motionController.forward();
       }
     });
+    _startTimer();
+  }
+
+  void _startTimer(){
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          _timer?.cancel();
+          motionController.stop();
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     motionController.dispose();
+
+    //Confetti
+    _controllerTopLeft.dispose();
+    _controllerTopRight.dispose();
+
+    //Timer
+    _timer?.cancel();
+
     super.dispose();
   }
 
@@ -69,10 +101,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         padding: const EdgeInsets.only(top: 200, left: 8, right: 8),
         child: Column(
           children: <Widget>[
-            TextField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter your message...',
+            Center(
+              child: Text(
+                'Countdown: $_countdown',
+                style: const TextStyle(fontSize: 16),  
               ),
             ),
             Center(
