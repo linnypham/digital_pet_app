@@ -56,10 +56,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     motionController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         motionController.reverse();
+        _controllerTopLeft.stop();
+        _controllerTopRight.stop();
       } else if (status == AnimationStatus.dismissed) {
         motionController.forward();
+        _controllerTopLeft.play();
+        _controllerTopRight.play();
       }
     });
+
+    //Confetti
+    _controllerTopLeft = ConfettiController(duration: const Duration(seconds: 10));
+    _controllerTopRight = ConfettiController(duration: const Duration(seconds: 10));
+
+    //Timer
     _startTimer();
   }
 
@@ -71,6 +81,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         } else {
           _timer?.cancel();
           motionController.stop();
+          _controllerTopLeft.stop();
+          _controllerTopRight.stop();
         }
       });
     });
@@ -122,6 +134,27 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           );
                         },
                         child: Image.asset('assets/images/heart.png'),
+                      ),
+                    ),
+                    //Confetti Left and Right
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: ConfettiWidget(
+                        confettiController: _controllerTopLeft,
+                        blastDirection: -45,
+                        emissionFrequency: 0.1,
+                        numberOfParticles: 10,
+                        gravity: 0.1,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: ConfettiWidget(
+                        confettiController: _controllerTopRight,
+                        blastDirection: 135,
+                        emissionFrequency: 0.1,
+                        numberOfParticles: 10,
+                        gravity: 0.1,
                       ),
                     ),
                   ],
