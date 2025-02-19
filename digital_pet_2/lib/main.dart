@@ -18,6 +18,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
+  int energyLevel = 100;
   String newPetName = "";
   Color petColor = Colors.yellow;
   Timer? _hungerTimer;
@@ -27,6 +28,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _resetState(){
     happinessLevel = 50;
     hungerLevel = 50;
+    energyLevel = 100;
   }
   void _startHungerTimer() {
     _hungerTimer = Timer.periodic(Duration(seconds: 30), (_) {
@@ -106,6 +108,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _playWithPet() {
     setState(() {
       happinessLevel = (happinessLevel + 10).clamp(0, 100);
+      energyLevel = (energyLevel - 10).clamp(0, 100);
       _updateHunger();
       _updateColor();
     });
@@ -115,6 +118,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _feedPet() {
     setState(() {
       hungerLevel = (hungerLevel - 10).clamp(0, 100);
+      energyLevel = (energyLevel + 20).clamp(0, 100);
       _updateHappiness();
       _updateColor();
     });
@@ -188,7 +192,9 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       appBar: AppBar(
         title: Text('Digital Pet'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -218,6 +224,17 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               'Hunger Level: $hungerLevel',
               style: TextStyle(fontSize: 20.0),
             ),
+            SizedBox(height: 16.0),
+            Text(
+              'Energy Level: $energyLevel',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            SizedBox(height: 8.0),
+            LinearProgressIndicator(
+              value: energyLevel / 100,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            ),
             SizedBox(height: 32.0),
             ElevatedButton(
               onPressed: _playWithPet,
@@ -245,6 +262,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
