@@ -23,6 +23,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   Timer? _hungerTimer;
   Timer? _winTimer;
   bool isWinning = false;
+  List<String> activities = ['Play', 'Feed', 'Walk', 'Groom'];
+  String selectedActivity = 'Play';
 
   void _resetState(){
     happinessLevel = 50;
@@ -171,6 +173,18 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       return 'Unhappy 😠';
     }
   }
+  void _performActivity(String activity) {
+  setState(() {
+    switch (activity) {
+      case 'Play':
+        _playWithPet();
+        break;
+      case 'Feed':
+        _feedPet();
+        break;
+    }
+  });
+}
 
   @override
   void initState() {
@@ -218,16 +232,27 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               'Hunger Level: $hungerLevel',
               style: TextStyle(fontSize: 20.0),
             ),
+            DropdownButton<String>(
+              value: selectedActivity,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedActivity = newValue!;
+                });
+              },
+              items: activities.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            ElevatedButton(
+              onPressed: () => _performActivity(selectedActivity),
+              child: Text('Perform Activity'),
+            ),
+
             SizedBox(height: 32.0),
-            ElevatedButton(
-              onPressed: _playWithPet,
-              child: Text('Play with Your Pet'),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _feedPet,
-              child: Text('Feed Your Pet'),
-            ),
+            
             TextField(
               onChanged: (text) {
                 setState(() {
