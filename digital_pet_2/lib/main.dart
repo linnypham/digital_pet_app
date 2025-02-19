@@ -57,7 +57,6 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     }
   }
 
-  
   void _changeName(String newPetName){
   setState(() {
     petName = newPetName;
@@ -76,6 +75,18 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     }
   }
 
+  String _getMood() {
+    if (happinessLevel > 70) {
+      return 'Happy 😊';
+    }
+    else if (happinessLevel >=30 && happinessLevel <= 70) {
+      return 'Neutral 😐';
+    }
+    else {
+      return 'Unhappy 😠';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,6 +98,11 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             
+            Text(
+              _getMood(),
+              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+            ),
+
             Container(
               color: petColor,
               padding: EdgeInsets.all(16.0),
