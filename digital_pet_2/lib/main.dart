@@ -19,6 +19,9 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   int hungerLevel = 50;
   String newPetName = "";
   Color petColor = Colors.yellow;
+  bool isWon = false;
+  bool isGameOver = false;
+  DateTime? happinessAbove80Time;
 
 
   // Function to increase happiness and update hunger when playing with the pet
@@ -27,6 +30,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       happinessLevel = (happinessLevel + 10).clamp(0, 100);
       _updateHunger();
       _updateColor();
+      _checkWin();
+      _checkGameOver();
     });
   }
 
@@ -36,6 +41,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       hungerLevel = (hungerLevel - 10).clamp(0, 100);
       _updateHappiness();
       _updateColor();
+      _checkWin();
+      _checkGameOver();
     });
   }
 
@@ -87,22 +94,72 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     }
   }
 
+  void _checkWin() {
+    if (happinessLevel > 80) {
+      if (happinessAbove80Time == null) {
+        happinessAbove80Time = DateTime.now();
+      }
+      else {
+        final duration = DateTime.now().difference(happinessAbove80Time!);
+        if (duration.inSeconds >= 60) {
+          setState(() {
+            isWon = true;
+          });
+        }
+      }
+    }
+    else {
+      happinessAbove80Time = null;
+    }
+  }
+
+  void _checkGameOver() {
+    if(hungerLevel >= 100 && happinessLevel <= 10) {
+      setState(() {
+        isGameOver = true;
+      });
+    }
+  }
+
+  void _resetGame() {
+    setState(() {
+      happinessLevel = 50;
+      hungerLevel = 50;
+      isGameOver = false;
+      isWon = false;
+      happinessAbove80Time = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Digital Pet'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             
+            if (isGameOver)
+              Text(
+                'Game Over',
+                style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.red),
+              )
+            else if (isWon)
+              Text(
+                'You Won',
+                style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.green),
+              ),
+
             Text(
               _getMood(),
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
-
+            SizedBox(height: 16.0),
             Container(
               color: petColor,
               padding: EdgeInsets.all(16.0),
@@ -133,6 +190,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               onPressed: _feedPet,
               child: Text('Feed Your Pet'),
             ),
+            SizedBox(height: 16.0),
             TextField(
               onChanged: (text) {
                 setState(() {
@@ -144,13 +202,20 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
                 labelText: 'Enter your pet name...',
               ),
             ),
+            SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () => _changeName(newPetName),
-              child: Text('Enter.'),
+              child: Text('Enter'),
             ),
+            if (isGameOver || isWon)
+              ElevatedButton(
+                onPressed: _resetGame,
+                child: Text('Reset Game'),
+              ),
           ],
         ),
       ),
+    ),
     );
   }
 }
