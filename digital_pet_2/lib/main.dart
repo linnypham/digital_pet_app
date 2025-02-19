@@ -18,20 +18,17 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
+  int energyLevel = 100;
   String newPetName = "";
   Color petColor = Colors.yellow;
   Timer? _hungerTimer;
   Timer? _winTimer;
   bool isWinning = false;
-  List<String> activities = ['Play', 'Feed', 'Walk', 'Groom'];
-  String selectedActivity = 'Play';
 
   void _resetState(){
-    setState(() {
-      happinessLevel = 50;
-      hungerLevel = 50;
-    });
-    
+    happinessLevel = 50;
+    hungerLevel = 50;
+    energyLevel = 100;
   }
   void _startHungerTimer() {
     _hungerTimer = Timer.periodic(Duration(seconds: 30), (_) {
@@ -111,6 +108,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _playWithPet() {
     setState(() {
       happinessLevel = (happinessLevel + 10).clamp(0, 100);
+      energyLevel = (energyLevel - 10).clamp(0, 100);
       _updateHunger();
       _updateColor();
     });
@@ -120,23 +118,10 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _feedPet() {
     setState(() {
       hungerLevel = (hungerLevel - 10).clamp(0, 100);
+      energyLevel = (energyLevel + 20).clamp(0, 100);
       _updateHappiness();
       _updateColor();
     });
-  }
-  void _walkPet() {
-    happinessLevel = (happinessLevel + 15).clamp(0, 100);
-    hungerLevel = (hungerLevel + 10).clamp(0, 100);
-    _updateHappiness();
-    _checkWinCondition();
-    _checkLossCondition();
-  }
-
-  void _groomPet() {
-    happinessLevel = (happinessLevel + 5).clamp(0, 100);
-    _updateHappiness();
-    _checkWinCondition();
-    _checkLossCondition();
   }
 
   // Update happiness based on hunger level
@@ -190,24 +175,6 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       return 'Unhappy 😠';
     }
   }
-  void _performActivity(String activity) {
-  setState(() {
-    switch (activity) {
-      case 'Play':
-        _playWithPet();
-        break;
-      case 'Feed':
-        _feedPet();
-        break;
-      case 'Walk':
-        _walkPet();
-        break;
-      case 'Groom':
-        _groomPet();
-        break;
-    }
-  });
-}
 
   @override
   void initState() {
@@ -225,7 +192,9 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       appBar: AppBar(
         title: Text('Digital Pet'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -255,27 +224,27 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               'Hunger Level: $hungerLevel',
               style: TextStyle(fontSize: 20.0),
             ),
-            DropdownButton<String>(
-              value: selectedActivity,
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedActivity = newValue!;
-                });
-              },
-              items: activities.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+            SizedBox(height: 16.0),
+            Text(
+              'Energy Level: $energyLevel',
+              style: TextStyle(fontSize: 20.0),
             ),
-            ElevatedButton(
-              onPressed: () => _performActivity(selectedActivity),
-              child: Text('Perform Activity'),
+            SizedBox(height: 8.0),
+            LinearProgressIndicator(
+              value: energyLevel / 100,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
-
             SizedBox(height: 32.0),
-            
+            ElevatedButton(
+              onPressed: _playWithPet,
+              child: Text('Play with Your Pet'),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _feedPet,
+              child: Text('Feed Your Pet'),
+            ),
             TextField(
               onChanged: (text) {
                 setState(() {
@@ -293,6 +262,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
