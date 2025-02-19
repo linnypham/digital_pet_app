@@ -7,6 +7,8 @@ void main() {
 }
 
 class DigitalPetApp extends StatefulWidget {
+  const DigitalPetApp({super.key});
+
   @override
   _DigitalPetAppState createState() => _DigitalPetAppState();
 }
@@ -15,6 +17,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
+  String newPetName = "";
 
   // Function to increase happiness and update hunger when playing with the pet
   void _playWithPet() {
@@ -49,6 +52,14 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       happinessLevel = (happinessLevel - 20).clamp(0, 100);
     }
   }
+  
+  void _changeName(String newPetName){
+  setState(() {
+    petName = newPetName;
+  });
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +97,21 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
             ElevatedButton(
               onPressed: _feedPet,
               child: Text('Feed Your Pet'),
+            ),
+            TextField(
+              onChanged: (text) {
+                setState(() {
+                  newPetName = text;
+                });
+              },
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Enter your pet name...',
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => _changeName(newPetName),
+              child: Text('Enter.'),
             ),
           ],
         ),
