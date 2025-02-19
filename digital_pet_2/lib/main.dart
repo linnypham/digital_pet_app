@@ -18,12 +18,15 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   int happinessLevel = 50;
   int hungerLevel = 50;
   String newPetName = "";
+  Color petColor = Colors.yellow;
+
 
   // Function to increase happiness and update hunger when playing with the pet
   void _playWithPet() {
     setState(() {
       happinessLevel = (happinessLevel + 10).clamp(0, 100);
       _updateHunger();
+      _updateColor();
     });
   }
 
@@ -32,6 +35,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     setState(() {
       hungerLevel = (hungerLevel - 10).clamp(0, 100);
       _updateHappiness();
+      _updateColor();
     });
   }
 
@@ -52,6 +56,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       happinessLevel = (happinessLevel - 20).clamp(0, 100);
     }
   }
+
   
   void _changeName(String newPetName){
   setState(() {
@@ -59,7 +64,17 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   });
 }
 
-
+  void _updateColor() {
+    if (happinessLevel > 70) {
+      petColor = Colors.green;
+    }
+    else if (happinessLevel >= 30 || happinessLevel <= 70) {
+      petColor = Colors.yellow;
+    }
+    else {
+      petColor = Colors.red;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +87,11 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             
-            Image.asset('assets/images/pet.png'),
+            Container(
+              color: petColor,
+              padding: EdgeInsets.all(16.0),
+              child: Image.asset('assets/images/pet.png'),
+            ),
             
             Text(
               'Name: $petName',
