@@ -68,7 +68,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     if (happinessLevel > 70) {
       petColor = Colors.green;
     }
-    else if (happinessLevel >= 30 || happinessLevel <= 70) {
+    else if (happinessLevel >= 30 && happinessLevel <= 70) {
       petColor = Colors.yellow;
     }
     else {
