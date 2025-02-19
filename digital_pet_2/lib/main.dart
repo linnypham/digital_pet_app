@@ -27,8 +27,11 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String selectedActivity = 'Play';
 
   void _resetState(){
-    happinessLevel = 50;
-    hungerLevel = 50;
+    setState(() {
+      happinessLevel = 50;
+      hungerLevel = 50;
+    });
+    
   }
   void _startHungerTimer() {
     _hungerTimer = Timer.periodic(Duration(seconds: 30), (_) {
