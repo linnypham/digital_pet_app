@@ -124,6 +124,20 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       _updateColor();
     });
   }
+  void _walkPet() {
+    happinessLevel = (happinessLevel + 15).clamp(0, 100);
+    hungerLevel = (hungerLevel + 10).clamp(0, 100);
+    _updateHappiness();
+    _checkWinCondition();
+    _checkLossCondition();
+  }
+
+  void _groomPet() {
+    happinessLevel = (happinessLevel + 5).clamp(0, 100);
+    _updateHappiness();
+    _checkWinCondition();
+    _checkLossCondition();
+  }
 
   // Update happiness based on hunger level
   void _updateHappiness() {
@@ -184,6 +198,12 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
         break;
       case 'Feed':
         _feedPet();
+        break;
+      case 'Walk':
+        _walkPet();
+        break;
+      case 'Groom':
+        _groomPet();
         break;
     }
   });
