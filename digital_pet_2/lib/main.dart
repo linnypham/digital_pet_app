@@ -236,15 +236,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
             SizedBox(height: 32.0),
-            ElevatedButton(
-              onPressed: _playWithPet,
-              child: Text('Play with Your Pet'),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _feedPet,
-              child: Text('Feed Your Pet'),
-            ),
+            
             TextField(
               onChanged: (text) {
                 setState(() {
