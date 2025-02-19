@@ -21,14 +21,85 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String newPetName = "";
   Color petColor = Colors.yellow;
   Timer? _hungerTimer;
+  Timer? _winTimer;
+  bool isWinning = false;
 
+  void _resetState(){
+    happinessLevel = 50;
+    hungerLevel = 50;
+  }
   void _startHungerTimer() {
     _hungerTimer = Timer.periodic(Duration(seconds: 30), (_) {
       setState(() {
         hungerLevel = (hungerLevel + 5).clamp(0, 100);
         _updateHappiness();
+        _checkWinCondition();
+        _checkLossCondition();
       });
     });
+  }
+
+  void _checkWinCondition() {
+    if (happinessLevel > 80 && !isWinning) {
+      isWinning = true;
+      _winTimer = Timer(Duration(minutes: 1), () {
+        _showWinDialog();
+      });
+    } else if (happinessLevel <= 80 && isWinning) {
+      isWinning = false;
+      _winTimer?.cancel();
+    }
+    
+  }
+
+  void _checkLossCondition() {
+    if (hungerLevel >= 100 && happinessLevel <= 10) {
+      _showLossDialog();
+      
+    }
+    
+  }
+
+  void _showWinDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('You Win'),
+          content: Text('Your pet is evolved!!!'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _resetState();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLossDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Game Over'),
+          content: Text('Your pet is too hungry and unhappy. You lost!'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _resetState();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Function to increase happiness and update hunger when playing with the pet
@@ -52,10 +123,12 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   // Update happiness based on hunger level
   void _updateHappiness() {
     if (hungerLevel < 30) {
-      happinessLevel = (happinessLevel - 20).clamp(0, 100);
+      happinessLevel = (happinessLevel + 20).clamp(0, 100);
     } else {
-      happinessLevel = (happinessLevel + 10).clamp(0, 100);
+      happinessLevel = (happinessLevel - 10).clamp(0, 100);
     }
+    _checkWinCondition();
+    _checkLossCondition();
   }
 
   // Increase hunger level slightly when playing with the pet
@@ -65,6 +138,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       hungerLevel = 100;
       happinessLevel = (happinessLevel - 20).clamp(0, 100);
     }
+    _checkWinCondition();
+    _checkLossCondition();
   }
 
   void _changeName(String newPetName){
