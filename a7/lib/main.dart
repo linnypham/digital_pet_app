@@ -47,15 +47,13 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
       if (value) {
         // Night Mode
         backgroundColor = Colors.black;
-        
       } else {
         // Day Mode
         backgroundColor = Colors.blue;
-        
       }
     });
   }
-
+  
   void _showColorPicker() async {
     Color pickerColor = textColor;
     Color currentColor = textColor;
@@ -78,7 +76,7 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text('Got it'),
+              child: const Text('Apply'),
               onPressed: () {
                 setState(() {
                   currentColor = pickerColor;
@@ -97,13 +95,14 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
       });
     }
   }
-
+  
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: backgroundColor,
-        title: Text('Fading Text Animation', style: TextStyle(color: textColor)),
+        title: Text('Fading Text Animation' ,style: TextStyle(color: textColor)),
         iconTheme: IconThemeData(color: textColor),
         actions: <Widget>[
           IconButton(
@@ -155,7 +154,10 @@ class ColorPicker extends StatefulWidget {
   final Color pickerColor;
   final ValueChanged<Color> onColorChanged;
 
-  const ColorPicker({super.key, required this.pickerColor, required this.onColorChanged});
+  ColorPicker({
+    required this.pickerColor,
+    required this.onColorChanged,
+  });
 
   @override
   _ColorPickerState createState() => _ColorPickerState();
