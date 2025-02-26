@@ -45,6 +45,45 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
     });
   }
 
+  void _showColorPicker() async {
+    Color pickerColor = textColor;
+    Color currentColor = textColor;
+
+    final Color? selectedColor = await showDialog<Color>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Pick a color!'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (color) {
+                pickerColor = color;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Apply'),
+              onPressed: () {
+                setState(() {
+                  currentColor = pickerColor;
+                });
+                Navigator.of(context).pop(currentColor);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (selectedColor != null) {
+      setState(() {
+        textColor = selectedColor;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,6 +91,12 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
         backgroundColor: backgroundColor,
         title: Text('Fading Text Animation', style: TextStyle(color: textColor)),
         iconTheme: IconThemeData(color: textColor),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.color_lens),
+            onPressed: _showColorPicker,
+          ),
+        ],
       ),
       body: PageView(
         children: [
@@ -123,6 +168,63 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
         onPressed: toggleVisibility,
         child: const Icon(Icons.play_arrow),
       ),
+    );
+  }
+}
+
+class ColorPicker extends StatefulWidget {
+  final Color pickerColor;
+  final ValueChanged<Color> onColorChanged;
+
+  ColorPicker({
+    required this.pickerColor,
+    required this.onColorChanged,
+  });
+
+  @override
+  _ColorPickerState createState() => _ColorPickerState();
+}
+
+class _ColorPickerState extends State<ColorPicker> {
+  late Color _currentColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentColor = widget.pickerColor;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 200,
+          child: GridView.count(
+            crossAxisCount: 4,
+            children: List.generate(Colors.primaries.length, (index) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _currentColor = Colors.primaries[index];
+                  });
+                  widget.onColorChanged(_currentColor);
+                },
+                child: Container(
+                  color: Colors.primaries[index],
+                  margin: EdgeInsets.all(8.0),
+                ),
+              );
+            }),
+          ),
+        ),
+        Container(
+          width: 100,
+          height: 50,
+          color: _currentColor,
+          margin: EdgeInsets.all(16.0),
+        ),
+      ],
     );
   }
 }
