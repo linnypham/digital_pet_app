@@ -29,6 +29,10 @@ class FadingTextAnimation extends StatefulWidget {
 class _FadingTextAnimationState extends State<FadingTextAnimation> {
   bool _isVisible = true;
   bool val = false;
+  Color sunColor = Colors.yellow;
+  Color moonColor = Colors.grey;
+  Color dayColor = Colors.blue;
+  Color nightColor = Colors.black;
   Color backgroundColor = Colors.white;
   Color textColor = Colors.black;
 
@@ -40,25 +44,36 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
 
   void toggleDayNight(bool value) {
     setState(() {
-      val = value;
-      backgroundColor = value ? Colors.black : Colors.white;
-      textColor = value ? Colors.white : Colors.black;
+      if (value) {
+        // Night Mode
+        backgroundColor = Colors.black;
+        textColor = Colors.white;
+      } else {
+        // Day Mode
+        backgroundColor = Colors.blue;
+        textColor = Colors.black;
+      }
     });
   }
 
   void _showColorPicker() async {
     Color pickerColor = textColor;
+    Color currentColor = textColor;
+
     final Color? selectedColor = await showDialog<Color>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Pick a color!'),
           content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: pickerColor,
-              onColorChanged: (color) {
-                pickerColor = color;
-              },
+            child: Container(
+              width: double.maxFinite,
+              child: ColorPicker(
+                pickerColor: pickerColor,
+                onColorChanged: (color) {
+                  pickerColor = color;
+                },
+              ),
             ),
           ),
           actions: <Widget>[
@@ -66,15 +81,21 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
               child: const Text('Got it'),
               onPressed: () {
                 setState(() {
-                  textColor = pickerColor;
+                  currentColor = pickerColor;
                 });
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(currentColor);
               },
             ),
           ],
         );
       },
     );
+
+    if (selectedColor != null) {
+      setState(() {
+        textColor = selectedColor;
+      });
+    }
   }
 
   @override
@@ -84,9 +105,9 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
         backgroundColor: backgroundColor,
         title: Text('Fading Text Animation', style: TextStyle(color: textColor)),
         iconTheme: IconThemeData(color: textColor),
-        actions: [
+        actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.color_lens, color: textColor),
+            icon: Icon(Icons.color_lens),
             onPressed: _showColorPicker,
           ),
         ],
@@ -106,15 +127,25 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
             const SizedBox(height: 20),
             DayNightSwitch(
               value: val,
-              onChanged: toggleDayNight,
+              moonImage: AssetImage('assets/moon.png'),
+              sunImage: AssetImage('assets/sun.png'),
+              sunColor: sunColor,
+              moonColor: moonColor,
+              dayColor: dayColor,
+              nightColor: nightColor,
+              onChanged: (value) {
+                setState(() {
+                  toggleDayNight(value);
+                  val = value;              
+                });
+              },
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: textColor,
         onPressed: toggleVisibility,
-        child: Icon(Icons.play_arrow, color: backgroundColor),
+        child: Icon(Icons.play_arrow),
       ),
     );
   }
@@ -124,7 +155,7 @@ class ColorPicker extends StatefulWidget {
   final Color pickerColor;
   final ValueChanged<Color> onColorChanged;
 
-  ColorPicker({required this.pickerColor, required this.onColorChanged});
+  const ColorPicker({super.key, required this.pickerColor, required this.onColorChanged});
 
   @override
   _ColorPickerState createState() => _ColorPickerState();
