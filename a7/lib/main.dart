@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.light, 
+      themeMode: ThemeMode.light,
       home: FadingTextAnimation(),
     );
   }
@@ -30,10 +30,6 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
   bool _isVisible = true;
   bool _showFrame = false;
   bool val = false;
-  Color sunColor = Colors.yellow;
-  Color moonColor = Colors.grey;
-  Color dayColor = Colors.blue;
-  Color nightColor = Colors.black;
   Color backgroundColor = Colors.white;
   Color textColor = Colors.black;
 
@@ -45,23 +41,45 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
 
   void toggleDayNight(bool value) {
     setState(() {
-      if (value) {
-        backgroundColor = Colors.black;
-      } else {
-        backgroundColor = Colors.blue;
-      }
+      backgroundColor = value ? Colors.black : Colors.blue;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: backgroundColor,
-        title: const Text('Fading Text Animation', style: TextStyle(color: Colors.black)),
+        title: Text('Fading Text Animation', style: TextStyle(color: textColor)),
+        iconTheme: IconThemeData(color: textColor),
       ),
       body: PageView(
         children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedOpacity(
+                  opacity: _isVisible ? 1.0 : 0.0,
+                  duration: const Duration(seconds: 1),
+                  child: const Text(
+                    'Hello, Flutter!',
+                    style: TextStyle(fontSize: 24),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                DayNightSwitch(
+                  value: val,
+                  onChanged: (value) {
+                    setState(() {
+                      toggleDayNight(value);
+                      val = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -73,28 +91,12 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
                     duration: const Duration(seconds: 1),
                     curve: Curves.easeInOut,
                     child: const Text(
-                      'Hello, Flutter!',
+                      'Bye Flutter!',
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-                DayNightSwitch(
-                  value: val,
-                  onChanged: (value) {
-                    setState(() {
-                      toggleDayNight(value);
-                      val = value;               
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
                 SwitchListTile(
                   title: const Text('Show Frame'),
                   value: _showFrame,
@@ -107,7 +109,7 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
                 Container(
                   decoration: _showFrame
                       ? BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 4),
+                          border: Border.all(color: Colors.black, width: 3),
                         )
                       : null,
                   child: Image.asset('assets/panda.png', width: 100, height: 100),
