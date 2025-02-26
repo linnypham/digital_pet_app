@@ -47,11 +47,11 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
       if (value) {
         // Night Mode
         backgroundColor = Colors.black;
-        textColor = Colors.white;
+        
       } else {
         // Day Mode
         backgroundColor = Colors.blue;
-        textColor = Colors.black;
+        
       }
     });
   }
