@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:day_night_switch/day_night_switch.dart';
+import 'dart:math';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -13,28 +13,35 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.light, 
-      home: FadingTextAnimation(),
+      themeMode: ThemeMode.light,
+      home: const AnimatedWidgetsDemo(),
     );
   }
 }
 
-class FadingTextAnimation extends StatefulWidget {
-  const FadingTextAnimation({super.key});
+class AnimatedWidgetsDemo extends StatefulWidget {
+  const AnimatedWidgetsDemo({super.key});
 
   @override
-  _FadingTextAnimationState createState() => _FadingTextAnimationState();
+  _AnimatedWidgetsDemoState createState() => _AnimatedWidgetsDemoState();
 }
 
-class _FadingTextAnimationState extends State<FadingTextAnimation> {
+class _AnimatedWidgetsDemoState extends State<AnimatedWidgetsDemo>
+    with SingleTickerProviderStateMixin {
   bool _isVisible = true;
-  bool val = false;
-  Color sunColor = Colors.yellow;
-  Color moonColor = Colors.grey;
-  Color dayColor = Colors.blue;
-  Color nightColor = Colors.black;
-  Color backgroundColor = Colors.white;
-  Color textColor = Colors.black;
+  bool _showFrame = false;
+  bool _rotate = false;
+  bool _fadeImage = false;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+  }
 
   void toggleVisibility() {
     setState(() {
@@ -42,167 +49,100 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
     });
   }
 
-  void toggleDayNight(bool value) {
+  void toggleRotation() {
     setState(() {
-      if (value) {
-        // Night Mode
-        backgroundColor = Colors.black;
+      _rotate = !_rotate;
+      if (_rotate) {
+        _controller.repeat();
       } else {
-        // Day Mode
-        backgroundColor = Colors.blue;
+        _controller.stop();
       }
     });
   }
-  
-  void _showColorPicker() async {
-    Color pickerColor = textColor;
-    Color currentColor = textColor;
 
-    final Color? selectedColor = await showDialog<Color>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pick a color!'),
-          content: SingleChildScrollView(
-            child: Container(
-              width: double.maxFinite,
-              child: ColorPicker(
-                pickerColor: pickerColor,
-                onColorChanged: (color) {
-                  pickerColor = color;
-                },
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Apply'),
-              onPressed: () {
-                setState(() {
-                  currentColor = pickerColor;
-                });
-                Navigator.of(context).pop(currentColor);
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    if (selectedColor != null) {
-      setState(() {
-        textColor = selectedColor;
-      });
-    }
+  void toggleImageFade() {
+    setState(() {
+      _fadeImage = !_fadeImage;
+    });
   }
-  
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        title: Text('Fading Text Animation' ,style: TextStyle(color: textColor)),
-        iconTheme: IconThemeData(color: textColor),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.color_lens),
-            onPressed: _showColorPicker,
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Flutter Animations')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedOpacity(
-              opacity: _isVisible ? 1.0 : 0.0,
-              duration: Duration(seconds: 1),
-              child: Text(
-                'Hello, Flutter!',
-                style: TextStyle(fontSize: 24, color: textColor),
+            GestureDetector(
+              onTap: toggleVisibility,
+              child: AnimatedOpacity(
+                opacity: _isVisible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeInOutCubic,
+                child: const Text(
+                  'Hello, Animated Flutter!',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            DayNightSwitch(
-              value: val,
-              moonImage: AssetImage('assets/moon.png'),
-              sunImage: AssetImage('assets/sun.png'),
-              sunColor: sunColor,
-              moonColor: moonColor,
-              dayColor: dayColor,
-              nightColor: nightColor,
-              onChanged: (value) {
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Transform.rotate(
+                  angle: _rotate ? _controller.value * 2 * pi : 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: _showFrame
+                          ? Border.all(color: Colors.blue, width: 5)
+                          : null,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: AnimatedOpacity(
+                        opacity: _fadeImage ? 0.3 : 1.0,
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.easeInOut,
+                        child: Image.asset('assets/panda.png', width: 100),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            SwitchListTile(
+              title: const Text('Show Frame'),
+              value: _showFrame,
+              onChanged: (bool value) {
                 setState(() {
-                  toggleDayNight(value);
-                  val = value;              
+                  _showFrame = value;
                 });
               },
+            ),
+            ElevatedButton(
+              onPressed: toggleVisibility,
+              child: const Text('Toggle Text Visibility'),
+            ),
+            ElevatedButton(
+              onPressed: toggleRotation,
+              child: const Text('Toggle Rotation'),
+            ),
+            ElevatedButton(
+              onPressed: toggleImageFade,
+              child: const Text('Toggle Image Fade'),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: toggleVisibility,
-        child: Icon(Icons.play_arrow),
-      ),
     );
   }
-}
-
-class ColorPicker extends StatefulWidget {
-  final Color pickerColor;
-  final ValueChanged<Color> onColorChanged;
-
-  ColorPicker({
-    required this.pickerColor,
-    required this.onColorChanged,
-  });
 
   @override
-  _ColorPickerState createState() => _ColorPickerState();
-}
-
-class _ColorPickerState extends State<ColorPicker> {
-  late Color _currentColor;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentColor = widget.pickerColor;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 200,
-          child: GridView.count(
-            crossAxisCount: 4,
-            children: List.generate(Colors.primaries.length, (index) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _currentColor = Colors.primaries[index];
-                  });
-                  widget.onColorChanged(_currentColor);
-                },
-                child: Container(
-                  color: Colors.primaries[index],
-                  margin: EdgeInsets.all(8.0),
-                ),
-              );
-            }),
-          ),
-        ),
-        Container(
-          width: 100,
-          height: 50,
-          color: _currentColor,
-          margin: EdgeInsets.all(16.0),
-        ),
-      ],
-    );
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
