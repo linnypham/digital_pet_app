@@ -111,36 +111,55 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedOpacity(
-              opacity: _isVisible ? 1.0 : 0.0,
-              duration: Duration(seconds: 1),
-              child: Text(
-                'Hello, Flutter!',
-                style: TextStyle(fontSize: 24, color: textColor),
-              ),
+      body: PageView(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedOpacity(
+                    opacity: _isVisible ? 1.0 : 0.0,
+                    duration: Duration(seconds: 1),
+                    child: Text(
+                    'Hello, Flutter!',
+                    style: TextStyle(fontSize: 24, color: textColor),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  DayNightSwitch(
+                    value: val,
+                    moonImage: AssetImage('assets/moon.png'),
+                    sunImage: AssetImage('assets/sun.png'),
+                    sunColor: sunColor,
+                    moonColor: moonColor,
+                    dayColor: dayColor,
+                    nightColor: nightColor,
+                    onChanged: (value) {
+                      setState(() {
+                        toggleDayNight(value);
+                        val = value;              
+                      });
+                    },
+                  ),
+                ],
             ),
-            const SizedBox(height: 20),
-            DayNightSwitch(
-              value: val,
-              moonImage: AssetImage('assets/moon.png'),
-              sunImage: AssetImage('assets/sun.png'),
-              sunColor: sunColor,
-              moonColor: moonColor,
-              dayColor: dayColor,
-              nightColor: nightColor,
-              onChanged: (value) {
-                setState(() {
-                  toggleDayNight(value);
-                  val = value;              
-                });
-              },
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedOpacity(
+                  opacity: _isVisible ? 1.0 : 0.0,
+                  duration: Duration(seconds: 3),
+                  child: Text(
+                    'Bye Flutter!',
+                    style: TextStyle(fontSize: 24, color: textColor),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          )
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: toggleVisibility,
