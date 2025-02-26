@@ -20,7 +20,7 @@ class FadingTextAnimation extends StatefulWidget {
 
 class _FadingTextAnimationState extends State<FadingTextAnimation> {
   bool _isVisible = true;
-  Color _textColor = Colors.black;
+  Color textColor = Colors.black;
 
   void toggleVisibility() {
     setState(() {
@@ -29,8 +29,8 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
   }
 
   void _showColorPicker() async {
-    Color pickerColor = _textColor;
-    Color currentColor = _textColor;
+    Color pickerColor = textColor;
+    Color currentColor = textColor;
 
     final Color? selectedColor = await showDialog<Color>(
       context: context,
@@ -65,7 +65,7 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
 
     if (selectedColor != null) {
       setState(() {
-        _textColor = selectedColor;
+        textColor = selectedColor;
       });
     }
   }
@@ -88,7 +88,7 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
           duration: Duration(seconds: 1),
           child: Text(
             'Hello, Flutter!',
-            style: TextStyle(fontSize: 24, color: _textColor),
+            style: TextStyle(fontSize: 24, color: textColor),
           ),
         ),
       ),
