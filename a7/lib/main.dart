@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'package:day_night_switch/day_night_switch.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -13,35 +13,30 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.light,
-      home: const AnimatedWidgetsDemo(),
+      themeMode: ThemeMode.light, 
+      home: FadingTextAnimation(),
     );
   }
 }
 
-class AnimatedWidgetsDemo extends StatefulWidget {
-  const AnimatedWidgetsDemo({super.key});
+class FadingTextAnimation extends StatefulWidget {
+  const FadingTextAnimation({super.key});
 
   @override
-  _AnimatedWidgetsDemoState createState() => _AnimatedWidgetsDemoState();
+  _FadingTextAnimationState createState() => _FadingTextAnimationState();
 }
 
-class _AnimatedWidgetsDemoState extends State<AnimatedWidgetsDemo>
-    with SingleTickerProviderStateMixin {
+class _FadingTextAnimationState extends State<FadingTextAnimation> {
   bool _isVisible = true;
+  bool val = false;
+  Color sunColor = Colors.yellow;
+  Color moonColor = Colors.grey;
+  Color dayColor = Colors.blue;
+  Color nightColor = Colors.black;
+  Color backgroundColor = Colors.white;
+  Color textColor = Colors.black;
   bool _showFrame = false;
-  bool _rotate = false;
-  bool _fadeImage = false;
-  late AnimationController _controller;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    );
-  }
 
   void toggleVisibility() {
     setState(() {
@@ -49,100 +44,240 @@ class _AnimatedWidgetsDemoState extends State<AnimatedWidgetsDemo>
     });
   }
 
-  void toggleRotation() {
+  void toggleDayNight(bool value) {
     setState(() {
-      _rotate = !_rotate;
-      if (_rotate) {
-        _controller.repeat();
+      if (value) {
+        // Night Mode
+        backgroundColor = Colors.black;
       } else {
-        _controller.stop();
+        // Day Mode
+        backgroundColor = Colors.blue;
       }
     });
   }
+  
+  void _showColorPicker() async {
+    Color pickerColor = textColor;
+    Color currentColor = textColor;
 
-  void toggleImageFade() {
-    setState(() {
-      _fadeImage = !_fadeImage;
-    });
+    final Color? selectedColor = await showDialog<Color>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Pick a color!'),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: double.maxFinite,
+              child: ColorPicker(
+                pickerColor: pickerColor,
+                onColorChanged: (color) {
+                  pickerColor = color;
+                },
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Apply'),
+              onPressed: () {
+                setState(() {
+                  currentColor = pickerColor;
+                });
+                Navigator.of(context).pop(currentColor);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (selectedColor != null) {
+      setState(() {
+        textColor = selectedColor;
+      });
+    }
+  }
+  
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: backgroundColor,
+        title: Text('Fading Text Animation' ,style: TextStyle(color: textColor)),
+        iconTheme: IconThemeData(color: textColor),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.color_lens),
+            onPressed: _showColorPicker,
+          ),
+        ],
+      ),
+      body: PageView(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedOpacity(
+                    opacity: _isVisible ? 1.0 : 0.0,
+                    duration: Duration(seconds: 1),
+                    child: Text(
+                    'Hello, Flutter!',
+                    style: TextStyle(fontSize: 24, color: textColor),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  DayNightSwitch(
+                    value: val,
+                    moonImage: AssetImage('assets/moon.png'),
+                    sunImage: AssetImage('assets/sun.png'),
+                    sunColor: sunColor,
+                    moonColor: moonColor,
+                    dayColor: dayColor,
+                    nightColor: nightColor,
+                    onChanged: (value) {
+                      setState(() {
+                        toggleDayNight(value);
+                        val = value;              
+                      });
+                    },
+                  ),
+                ],
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: toggleVisibility,
+                  child: AnimatedOpacity(
+                    opacity: _isVisible ? 1.0 : 0.0,
+                    duration: const Duration(seconds: 1),
+                    child: const Text('Hello, Flutter!', style:
+                  TextStyle(fontSize: 24)),
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Column(
+                      children: [
+                        Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: _showFrame ? Border.all(color: Colors.blue, width: 5) : null,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.asset(
+                              'assets/panda.png',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Switch(
+                          value: _showFrame,
+                          onChanged: (bool value) {
+                            setState(() {
+                              _showFrame = value;
+                            });
+                          },
+                        ),
+                        Text('Show Frame: ${_showFrame ? 'On' : 'Off'}'),
+                      ],
+                    );
+                  },
+                ),
+                
+                const SizedBox(height: 20),
+                
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 2 * 3.14159),
+                  duration: const Duration(seconds: 5),
+                  builder: (BuildContext context, double value, Widget? child) {
+                    return Transform.rotate(
+                      angle: value,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        child: Image.asset('assets/panda.png'),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: toggleVisibility,
+        child: Icon(Icons.play_arrow),
+      ),
+    );
+  }
+}
+
+class ColorPicker extends StatefulWidget {
+  final Color pickerColor;
+  final ValueChanged<Color> onColorChanged;
+
+  const ColorPicker({super.key, 
+    required this.pickerColor,
+    required this.onColorChanged,
+  });
+
+  @override
+  _ColorPickerState createState() => _ColorPickerState();
+}
+
+class _ColorPickerState extends State<ColorPicker> {
+  late Color _currentColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentColor = widget.pickerColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Flutter Animations')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: toggleVisibility,
-              child: AnimatedOpacity(
-                opacity: _isVisible ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeInOutCubic,
-                child: const Text(
-                  'Hello, Animated Flutter!',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    return Column(
+      children: [
+        SizedBox(
+          height: 200,
+          child: GridView.count(
+            crossAxisCount: 4,
+            children: List.generate(Colors.primaries.length, (index) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _currentColor = Colors.primaries[index];
+                  });
+                  widget.onColorChanged(_currentColor);
+                },
+                child: Container(
+                  color: Colors.primaries[index],
+                  margin: EdgeInsets.all(8.0),
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return Transform.rotate(
-                  angle: _rotate ? _controller.value * 2 * pi : 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: _showFrame
-                          ? Border.all(color: Colors.blue, width: 5)
-                          : null,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: AnimatedOpacity(
-                        opacity: _fadeImage ? 0.3 : 1.0,
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.easeInOut,
-                        child: Image.asset('assets/panda.png', width: 100),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            SwitchListTile(
-              title: const Text('Show Frame'),
-              value: _showFrame,
-              onChanged: (bool value) {
-                setState(() {
-                  _showFrame = value;
-                });
-              },
-            ),
-            ElevatedButton(
-              onPressed: toggleVisibility,
-              child: const Text('Toggle Text Visibility'),
-            ),
-            ElevatedButton(
-              onPressed: toggleRotation,
-              child: const Text('Toggle Rotation'),
-            ),
-            ElevatedButton(
-              onPressed: toggleImageFade,
-              child: const Text('Toggle Image Fade'),
-            ),
-          ],
+              );
+            }),
+          ),
         ),
-      ),
+        Container(
+          width: 100,
+          height: 50,
+          color: _currentColor,
+          margin: EdgeInsets.all(16.0),
+        ),
+      ],
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }
