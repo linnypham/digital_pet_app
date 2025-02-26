@@ -9,6 +9,15 @@
       <excludeFolder url="file://$MODULE_DIR$/weather_info_app/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/weather_info_app/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/weather_info_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/a7/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/a7/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/a7/build" />
+      <excludeFolder url="file://$MODULE_DIR$/digital_pet_2/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/digital_pet_2/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/digital_pet_2/build" />
+      <excludeFolder url="file://$MODULE_DIR$/valentine/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/valentine/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/valentine/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
