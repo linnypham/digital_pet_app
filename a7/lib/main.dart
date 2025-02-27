@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.light, 
+      themeMode: ThemeMode.light,
       home: FadingTextAnimation(),
     );
   }
@@ -28,11 +28,8 @@ class FadingTextAnimation extends StatefulWidget {
 
 class _FadingTextAnimationState extends State<FadingTextAnimation> {
   bool _isVisible = true;
+  bool _showFrame = false;
   bool val = false;
-  Color sunColor = Colors.yellow;
-  Color moonColor = Colors.grey;
-  Color dayColor = Colors.blue;
-  Color nightColor = Colors.black;
   Color backgroundColor = Colors.white;
   Color textColor = Colors.black;
 
@@ -44,16 +41,10 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
 
   void toggleDayNight(bool value) {
     setState(() {
-      if (value) {
-        // Night Mode
-        backgroundColor = Colors.black;
-      } else {
-        // Day Mode
-        backgroundColor = Colors.blue;
-      }
+      backgroundColor = value ? Colors.black : Colors.blue;
     });
   }
-  
+
   void _showColorPicker() async {
     Color pickerColor = textColor;
     Color currentColor = textColor;
@@ -64,14 +55,11 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
         return AlertDialog(
           title: const Text('Pick a color!'),
           content: SingleChildScrollView(
-            child: Container(
-              width: double.maxFinite,
-              child: ColorPicker(
-                pickerColor: pickerColor,
-                onColorChanged: (color) {
-                  pickerColor = color;
-                },
-              ),
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (color) {
+                pickerColor = color;
+              },
             ),
           ),
           actions: <Widget>[
@@ -95,14 +83,13 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
       });
     }
   }
-  
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: backgroundColor,
-        title: Text('Fading Text Animation' ,style: TextStyle(color: textColor)),
+        title: Text('Fading Text Animation', style: TextStyle(color: textColor)),
         iconTheme: IconThemeData(color: textColor),
         actions: <Widget>[
           IconButton(
@@ -116,45 +103,61 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedOpacity(
-                    opacity: _isVisible ? 1.0 : 0.0,
-                    duration: Duration(seconds: 1),
-                    child: Text(
+              children: [
+                AnimatedOpacity(
+                  opacity: _isVisible ? 1.0 : 0.0,
+                  duration: const Duration(seconds: 1),
+                  child: const Text(
                     'Hello, Flutter!',
-                    style: TextStyle(fontSize: 24, color: textColor),
-                    ),
+                    style: TextStyle(fontSize: 24),
                   ),
-                  const SizedBox(height: 20),
-                  DayNightSwitch(
-                    value: val,
-                    moonImage: AssetImage('assets/moon.png'),
-                    sunImage: AssetImage('assets/sun.png'),
-                    sunColor: sunColor,
-                    moonColor: moonColor,
-                    dayColor: dayColor,
-                    nightColor: nightColor,
-                    onChanged: (value) {
-                      setState(() {
-                        toggleDayNight(value);
-                        val = value;              
-                      });
-                    },
-                  ),
-                ],
+                ),
+                const SizedBox(height: 20),
+                DayNightSwitch(
+                  value: val,
+                  onChanged: (value) {
+                    setState(() {
+                      toggleDayNight(value);
+                      val = value;
+                    });
+                  },
+                ),
+              ],
             ),
           ),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AnimatedOpacity(
-                  opacity: _isVisible ? 1.0 : 0.0,
-                  duration: Duration(seconds: 3),
-                  child: Text(
-                    'Bye Flutter!',
-                    style: TextStyle(fontSize: 24, color: textColor),
+                GestureDetector(
+                  onTap: toggleVisibility,
+                  child: AnimatedOpacity(
+                    opacity: _isVisible ? 1.0 : 0.0,
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.easeInOut,
+                    child: const Text(
+                      'Bye Flutter!',
+                      style: TextStyle(fontSize: 24),
+                    ),
                   ),
+                ),
+                const SizedBox(height: 20),
+                SwitchListTile(
+                  title: const Text('Show Frame'),
+                  value: _showFrame,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _showFrame = value;
+                    });
+                  },
+                ),
+                Container(
+                  decoration: _showFrame
+                      ? BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 3),
+                        )
+                      : null,
+                  child: Image.asset('assets/panda.png', width: 100, height: 100),
                 ),
               ],
             ),
@@ -163,7 +166,7 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: toggleVisibility,
-        child: Icon(Icons.play_arrow),
+        child: const Icon(Icons.play_arrow),
       ),
     );
   }
