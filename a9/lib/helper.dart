@@ -1,178 +1,124 @@
+// helper.dart
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-class Folder {
-  int? id;
-  String name;
-  String timestamp;
-
-  Folder({this.id, required this.name, required this.timestamp});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'timestamp': timestamp,
-    };
-  }
-
-  static Folder fromMap(Map<String, dynamic> map) {
-    return Folder(
-    id: map['id'],
-    name: map['name'],
-    timestamp: map['timestamp'],
-    );
-  }
-}
-
-class CardModel {
-  int? id;
-  String name;
-  String suit;
-  String imageUrl;
-  int folderId;
-
-  CardModel(
-      {this.id,
-      required this.name,
-      required this.suit,
-      required this.imageUrl,
-      required this.folderId});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'suit': suit,
-      'imageUrl': imageUrl,
-      'folderId': folderId,
-    };
-  }
-
-  static CardModel fromMap(Map<String, dynamic> map) {
-    return CardModel(
-      id: map['id'],
-      name: map['name'],
-      suit: map['suit'],
-      imageUrl: map['imageUrl'],
-      folderId: map['folderId'],
-    );
-  }
-}
-
 class DatabaseHelper {
-  late Database _db;
+  static final _databaseName = "CardOrganizer.db";
+  static final _databaseVersion = 1;
 
-  Future<Database> get db async {
-    return _db;
-      _db = await initializeDatabase();
-    return _db;
+  DatabaseHelper._privateConstructor();
+  static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
+
+  static Database? _database;
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDatabase();
+    return _database!;
   }
 
-  Future<Database> initializeDatabase() async {
-    final databasePath = await getDatabasesPath();
-    final path = join(databasePath, 'card_organizer.db');
-
-    return openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
+  _initDatabase() async {
+    String path = join(await getDatabasesPath(), _databaseName);
+    return await openDatabase(path,
+        version: _databaseVersion, onCreate: _onCreate);
   }
 
-  Future<void> _onCreate(Database db, int version) async {
+  Future _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE folders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
-        timestamp TEXT NOT NULL
+        timestamp INTEGER NOT NULL
       )
     ''');
 
     await db.execute('''
       CREATE TABLE cards (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         suit TEXT NOT NULL,
         imageUrl TEXT NOT NULL,
-        folderId INTEGER NOT NULL,
-        FOREIGN KEY (folderId) REFERENCES folders(id)
+        folderId INTEGER,
+        FOREIGN KEY (folderId) REFERENCES folders (id)
       )
     ''');
 
-    //Pre-defined folders
-    await db.insert('folders', {'name': 'Hearts', 'timestamp': DateTime.now().toString()});
-    await db.insert('folders', {'name': 'Spades', 'timestamp': DateTime.now().toString()});
-    await db.insert('folders', {'name': 'Diamonds', 'timestamp': DateTime.now().toString()});
-    await db.insert('folders', {'name': 'Clubs', 'timestamp': DateTime.now().toString()});
+    // Prepopulate folders
+    List<String> suits = ['Hearts', 'Spades', 'Diamonds', 'Clubs'];
+    for (String suit in suits) {
+      await db.insert('folders', {
+        'name': suit,
+        'timestamp': DateTime.now().millisecondsSinceEpoch
+      });
+    }
 
-    //Pre-populate cards (example)
-    await db.insert('cards', {
-      'name': 'Ace',
-      'suit': 'Hearts',
-      'imageUrl': 'https://example.com/ace_of_hearts.png',
-      'folderId': 1
-    });
-    await db.insert('cards', {
-      'name': 'King',
-      'suit': 'Spades',
-      'imageUrl': 'https://example.com/king_of_spades.png',
-      'folderId': 2
-    });
+    // Prepopulate cards
+    List<String> ranks = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King'];
+    for (String suit in suits) {
+      for (String rank in ranks) {
+        await db.insert('cards', {
+          'name': '$rank of $suit',
+          'suit': suit,
+          'imageUrl': 'https://example.com/${suit.toLowerCase()}_${rank.toLowerCase()}.png',
+          'folderId': null
+        });
+      }
+    }
   }
 
-  //Folder CRUD operations
   Future<List<Folder>> getFolders() async {
-    final dbInstance = await db;
-    final List<Map<String, dynamic>> maps = await dbInstance.query('folders');
-    return List.generate(maps.length, (i) {
-      return Folder.fromMap(maps[i]);
-    });
+    Database db = await instance.database;
+    var folders = await db.query('folders');
+    List<Folder> folderList = folders.isNotEmpty
+        ? folders.map((c) => Folder.fromMap(c)).toList()
+        : [];
+    return folderList;
   }
 
-  Future<int> insertFolder(Folder folder) async {
-    final dbInstance = await db;
-    return await dbInstance.insert('folders', folder.toMap());
-  }
-
-  Future<int> updateFolder(Folder folder) async {
-    final dbInstance = await db;
-    return await dbInstance.update('folders', folder.toMap(),
-        where: 'id = ?', whereArgs: [folder.id]);
-  }
-
-  Future<int> deleteFolder(int id) async {
-    final dbInstance = await db;
-    await dbInstance.delete('cards', where: 'folderId = ?', whereArgs: [id]);
-    return await dbInstance.delete('folders', where: 'id = ?', whereArgs: [id]);
-  }
-
-  //Card CRUD operations
-  Future<List<CardModel>> getCardsByFolderId(int folderId) async {
-    final dbInstance = await db;
-    final List<Map<String, dynamic>> maps = await dbInstance.query(
-      'cards',
-      where: 'folderId = ?',
-      whereArgs: [folderId],
-    );
-    return List.generate(maps.length, (i) {
-      return CardModel.fromMap(maps[i]);
-    });
-  }
-
-  Future<int> insertCard(CardModel card) async {
-    final dbInstance = await db;
-    return await dbInstance.insert('cards', card.toMap());
-  }
-
-  Future<int> updateCard(CardModel card) async {
-    final dbInstance = await db;
-    return await dbInstance.update('cards', card.toMap(),
-        where: 'id = ?', whereArgs: [card.id]);
+  Future<List<Card>> getCards(int folderId) async {
+    Database db = await instance.database;
+    var cards = await db.query('cards', where: 'folderId = ?', whereArgs: [folderId]);
+    List<Card> cardList = cards.isNotEmpty
+        ? cards.map((c) => Card.fromMap(c)).toList()
+        : [];
+    return cardList;
   }
 
   Future<int> deleteCard(int id) async {
-    final dbInstance = await db;
-    return await dbInstance.delete('cards', where: 'id = ?', whereArgs: [id]);
+    Database db = await instance.database;
+    return await db.delete('cards', where: 'id = ?', whereArgs: [id]);
   }
+}
+
+class Folder {
+  final int id;
+  final String name;
+  final int timestamp;
+  final int cardCount;
+
+  Folder({required this.id, required this.name, required this.timestamp, this.cardCount = 0});
+
+  factory Folder.fromMap(Map<String, dynamic> json) => Folder(
+    id: json['id'],
+    name: json['name'],
+    timestamp: json['timestamp'],
+  );
+}
+
+class Card {
+  final int id;
+  final String name;
+  final String suit;
+  final String imageUrl;
+  final int? folderId;
+
+  Card({required this.id, required this.name, required this.suit, required this.imageUrl, this.folderId});
+
+  factory Card.fromMap(Map<String, dynamic> json) => Card(
+    id: json['id'],
+    name: json['name'],
+    suit: json['suit'],
+    imageUrl: json['imageUrl'],
+    folderId: json['folderId'],
+  );
 }

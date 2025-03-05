@@ -1,169 +1,233 @@
-import 'package:flutter/material.dart';
-import 'helper.dart';
+// main.dart
 
-void main() {
-  runApp(MyApp());
+import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'helper.dart' as helper;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await helper.DatabaseHelper.instance.database;
+  runApp(CardOrganizerApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class CardOrganizerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Card Organizer',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: FolderScreen(),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: FoldersScreen(),
     );
   }
 }
 
-class FolderScreen extends StatefulWidget {
-  const FolderScreen({super.key});
-
+class FoldersScreen extends StatefulWidget {
   @override
-  _FolderScreenState createState() => _FolderScreenState();
+  _FoldersScreenState createState() => _FoldersScreenState();
 }
 
-class _FolderScreenState extends State<FolderScreen> {
-  late DatabaseHelper _databaseHelper;
-  List<Folder> _folders = [];
+class _FoldersScreenState extends State<FoldersScreen> {
+  List<helper.Folder> folders = [];
 
   @override
   void initState() {
     super.initState();
-    _databaseHelper = DatabaseHelper();
     _loadFolders();
   }
 
   _loadFolders() async {
-    _folders = await _databaseHelper.getFolders();
-    setState(() {});
+    List<helper.Folder> loadedFolders = await helper.DatabaseHelper.instance.getFolders();
+    setState(() {
+      folders = loadedFolders;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Card Organizer'),
-      ),
-      body: ListView.builder(
-        itemCount: _folders.length,
+      appBar: AppBar(title: Text('Card Organizer')),
+      body: GridView.builder(
+        padding: EdgeInsets.all(8),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: folders.length,
         itemBuilder: (context, index) {
-          final folder = _folders[index];
-          return Card(
-            child: ListTile(
-              leading: Icon(Icons.folder),
-              title: Text(folder.name),
-              subtitle: Text('Number of cards: (To be implemented)'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CardScreen(folder: folder),
-                  ),
-                ).then((value) => _loadFolders()); // Refresh on return
-              },
-            ),
-          );
+          return FolderCard(folder: folders[index]);
         },
       ),
     );
   }
 }
 
-class CardScreen extends StatefulWidget {
-  final Folder folder;
+class FolderCard extends StatelessWidget {
+  final helper.Folder folder;
 
-  const CardScreen({super.key, required this.folder});
+  FolderCard({required this.folder});
 
   @override
-  _CardScreenState createState() => _CardScreenState();
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CardsScreen(folderId: folder.id),
+          ),
+        );
+      },
+      child: Card(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.network(
+              'https://example.com/${folder.name.toLowerCase()}.png',
+              height: 80,
+              width: 80,
+              errorBuilder: (context, error, stackTrace) =>
+                  Icon(Icons.folder, size: 80),
+            ),
+            SizedBox(height: 10),
+            Text(folder.name),
+            Text('${folder.cardCount} cards'),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _CardScreenState extends State<CardScreen> {
-  late DatabaseHelper _databaseHelper;
-  List<CardModel> _cards = [];
+class CardsScreen extends StatefulWidget {
+  final int folderId;
+
+  CardsScreen({required this.folderId});
+
+  @override
+  _CardsScreenState createState() => _CardsScreenState();
+}
+
+class _CardsScreenState extends State<CardsScreen> {
+  List<helper.Card> cards = [];
 
   @override
   void initState() {
     super.initState();
-    _databaseHelper = DatabaseHelper();
     _loadCards();
   }
 
   _loadCards() async {
-    _cards = await _databaseHelper.getCardsByFolderId(widget.folder.id!);
-    setState(() {});
+    List<helper.Card> loadedCards = await helper.DatabaseHelper.instance.getCards(widget.folderId);
+    setState(() {
+      cards = loadedCards;
+    });
+  }
+
+  Future<void> _addCard() async {
+    if (cards.length >= 6) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('This folder can only hold 6 cards.'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // TODO: Implement card addition logic
+  }
+
+  Future<void> _deleteCard(helper.Card card) async {
+    await helper.DatabaseHelper.instance.deleteCard(card.id);
+    _loadCards();
+
+    if (cards.length < 3) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Warning'),
+          content: Text('You need at least 3 cards in this folder.'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.folder.name),
-      ),
+      appBar: AppBar(title: Text('Cards')),
       body: GridView.builder(
+        padding: EdgeInsets.all(8),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: 3,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
         ),
-        itemCount: _cards.length,
+        itemCount: cards.length,
         itemBuilder: (context, index) {
-          final card = _cards[index];
-          return Card(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                //TODO: Replace with Image.network(card.imageUrl)
-                //For demo purposes, using a SizedBox
-                SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: Placeholder(),
-                ),
-                Text(card.name),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    _deleteCard(card);
-                  },
-                ),
-              ],
-            ),
+          return CardItem(
+            card: cards[index],
+            onDelete: () => _deleteCard(cards[index]),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _addCard(context);
-        },
+        onPressed: _addCard,
         child: Icon(Icons.add),
       ),
     );
   }
+}
 
-  Future<void> _addCard(BuildContext context) async {
-    // Show a dialog or navigate to a screen to select a card to add
-    // For simplicity, let's add a dummy card
-    String newCardName = 'New Card'; // Replace with user input
-    String newCardImageUrl =
-        'https://example.com/image.png'; // Replace with user input
+class CardItem extends StatelessWidget {
+  final helper.Card card;
+  final VoidCallback onDelete;
 
-    final newCard = CardModel(
-      name: newCardName,
-      suit: widget.folder.name,
-      imageUrl: newCardImageUrl,
-      folderId: widget.folder.id!,
+  CardItem({required this.card, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Stack(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.network(
+                card.imageUrl,
+                height: 60,
+                width: 60,
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.credit_card, size: 60),
+              ),
+              SizedBox(height: 5),
+              Text(card.name),
+            ],
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: onDelete,
+            ),
+          ),
+        ],
+      ),
     );
-
-    await _databaseHelper.insertCard(newCard);
-    _loadCards();
-  }
-
-  Future<void> _deleteCard(CardModel card) async {
-    await _databaseHelper.deleteCard(card.id!);
-    _loadCards();
   }
 }
