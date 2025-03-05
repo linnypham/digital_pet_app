@@ -176,7 +176,7 @@ class ColorPicker extends StatefulWidget {
   final Color pickerColor;
   final ValueChanged<Color> onColorChanged;
 
-  ColorPicker({
+  const ColorPicker({super.key, 
     required this.pickerColor,
     required this.onColorChanged,
   });
