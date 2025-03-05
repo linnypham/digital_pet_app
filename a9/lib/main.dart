@@ -1,164 +1,224 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final dbHelper = DatabaseHelper();
-  await dbHelper.init();
-  runApp(CardOrganizerApp(dbHelper: dbHelper));
+  await DatabaseHelper.instance.init();
+  runApp(MyApp());
 }
 
-class CardOrganizerApp extends StatelessWidget {
-  final DatabaseHelper dbHelper;
-
-  const CardOrganizerApp({Key? key, required this.dbHelper}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Card Organizer',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: HomePage(dbHelper: dbHelper),
+      home: FoldersScreen(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  final DatabaseHelper dbHelper;
-
-  const HomePage({Key? key, required this.dbHelper}) : super(key: key);
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> folders = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFolders();
-  }
-
-  Future<void> _loadFolders() async {
-    final loadedFolders = await widget.dbHelper.queryAllFolders();
-    setState(() {
-      folders = loadedFolders;
-    });
-  }
+class FoldersScreen extends StatelessWidget {
+  const FoldersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Card Organizer'),
+        title: Text('Folders'),
       ),
-      body: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-        ),
-        itemCount: folders.length,
-        itemBuilder: (context, index) {
-          final folder = folders[index];
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => FolderPage(
-                    dbHelper: widget.dbHelper,
-                    folderId: folder['_id'],
-                    folderName: folder['folder_name'],
-                  ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: DatabaseHelper.instance.getFolders(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return CircularProgressIndicator();
+          return ListView.builder(
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              var folder = snapshot.data![index];
+              return ListTile(
+                title: Text(folder['name']),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CardsScreen(folderId: folder['id']),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class CardsScreen extends StatelessWidget {
+  final int folderId;
+  const CardsScreen({super.key, required this.folderId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cards'),
+      ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: DatabaseHelper.instance.getCardsByFolder(folderId),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return CircularProgressIndicator();
+          return GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2
+            ),
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              var card = snapshot.data![index];
+              return Card(
+                child: Column(
+                  children: [
+                    Image.network(card['imageUrl']),
+                    Text(card['name']),
+                    IconButton(
+                      onPressed: () async {
+                        await DatabaseHelper.instance.deleteCard(card['id']);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Card deleted')
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.delete),
+                    ),
+                  ],
                 ),
               );
             },
-            child: Card(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.folder, size: 64, color: Colors.blue),
-                  SizedBox(height: 8),
-                  Text(folder['folder_name'], style: TextStyle(fontSize: 18)),
-                ],
-              ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddCardScreen(folderId: folderId),
             ),
           );
         },
+        child: Icon(Icons.add),
       ),
     );
   }
 }
 
-class FolderPage extends StatefulWidget {
-  final DatabaseHelper dbHelper;
+class AddCardScreen extends StatefulWidget {
   final int folderId;
-  final String folderName;
-
-  const FolderPage({
-    Key? key,
-    required this.dbHelper,
-    required this.folderId,
-    required this.folderName,
-  }) : super(key: key);
+  const AddCardScreen({super.key, required this.folderId});
 
   @override
-  _FolderPageState createState() => _FolderPageState();
+  _AddCardScreenState createState() => _AddCardScreenState();
 }
 
-class _FolderPageState extends State<FolderPage> {
-  List<Map<String, dynamic>> cards = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCards();
-  }
-
-  Future<void> _loadCards() async {
-    final loadedCards = await widget.dbHelper.queryCardsInFolder(widget.folderId);
-    setState(() {
-      cards = loadedCards;
-    });
-  }
+class _AddCardScreenState extends State<AddCardScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _suitController = TextEditingController();
+  final _imageUrlController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.folderName),
+        title: Text('Add Card'),
       ),
-      body: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.7,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Card Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a card name';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _suitController,
+                decoration: InputDecoration(labelText: 'Card Suit'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a card suit';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _imageUrlController,
+                decoration: InputDecoration(labelText: 'Image URL'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an image URL';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _addCard,
+                child: Text('Add Card'),
+              ),
+            ],
+          ),
         ),
-        itemCount: cards.length,
-        itemBuilder: (context, index) {
-          final card = cards[index];
-          return Card(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CachedNetworkImage(
-                  imageUrl: card['image_url'],
-                  height: 100,
-                  placeholder: (context, url) => CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
-                ),
-                SizedBox(height: 8),
-                Text(card['card_name']),
-              ],
-            ),
-          );
-        },
       ),
     );
+  }
+
+  Future<void> _addCard() async {
+    if (_formKey.currentState!.validate()) {
+      // Check if the folder has fewer than 6 cards
+      final cardCount = await DatabaseHelper.instance.getCardCountInFolder(widget.folderId);
+      if (cardCount >= 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('This folder can only hold 6 cards')),
+        );
+        return;
+      }
+
+      // Insert the card into the database
+      await DatabaseHelper.instance.insertCard({
+        'name': _nameController.text,
+        'suit': _suitController.text,
+        'imageUrl': _imageUrlController.text,
+        'folderId': widget.folderId,
+      });
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Card added successfully')),
+      );
+
+      // Navigate back to the CardsScreen
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _suitController.dispose();
+    _imageUrlController.dispose();
+    super.dispose();
   }
 }
