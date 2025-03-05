@@ -33,6 +33,7 @@ class DatabaseHelper {
       onCreate: _onCreate,
     );
   }
+
   Future<int> insertCard(Map<String, dynamic> row) async {
     return await _db.insert(cardsTable, row);
   }
