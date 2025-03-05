@@ -39,9 +39,7 @@ class DatabaseHelper {
     );
   }
 
-  // Create the database tables
   Future<void> _onCreate(Database db, int version) async {
-    // Create folders table
     await db.execute('''
       CREATE TABLE $foldersTable (
         $columnFolderId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,7 +48,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // Create cards table
     await db.execute('''
       CREATE TABLE $cardsTable (
         $columnCardId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,7 +59,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // Prepopulate folders
     await db.insert(foldersTable, {
       columnFolderName: 'Hearts',
       columnFolderTimestamp: DateTime.now().toString(),
@@ -80,11 +76,11 @@ class DatabaseHelper {
       columnFolderTimestamp: DateTime.now().toString(),
     });
 
-    // Prepopulate cards
+    // Enter URLS
     List<Map<String, String>> cards = [
-      {'name': 'Ace of Hearts', 'suit': 'Hearts', 'imageUrl': 'https://example.com/ace_of_hearts.png'},
-      {'name': 'King of Hearts', 'suit': 'Hearts', 'imageUrl': 'https://example.com/king_of_hearts.png'},
-      // Add more cards here...
+      {'name': 'Ace of Hearts', 'suit': 'Hearts', 'imageUrl': 'URL'},
+      {'name': 'King of Hearts', 'suit': 'Hearts', 'imageUrl': 'URL'},
+      // Add more cards 
     ];
 
     for (var card in cards) {
@@ -92,12 +88,11 @@ class DatabaseHelper {
         columnCardName: card['name'],
         columnCardSuit: card['suit'],
         columnCardImageUrl: card['imageUrl'],
-        columnCardFolderId: 1, // Assign to Hearts folder
+        columnCardFolderId: 1,
       });
     }
   }
 
-  // CRUD operations for folders
   Future<int> insertFolder(Map<String, dynamic> folder) async {
     return await _db.insert(foldersTable, folder);
   }
@@ -106,7 +101,6 @@ class DatabaseHelper {
     return await _db.query(foldersTable);
   }
 
-  // CRUD operations for cards
   Future<int> insertCard(Map<String, dynamic> card) async {
     return await _db.insert(cardsTable, card);
   }
