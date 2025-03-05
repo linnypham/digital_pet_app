@@ -38,6 +38,7 @@ dependencies:
   path: ^1.9.0
   playing_cards: ^0.4.1+11
   path_provider: ^2.1.5
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
