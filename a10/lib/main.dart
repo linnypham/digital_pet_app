@@ -61,18 +61,18 @@ class SignupScreenState extends State<SignupScreen> {
             children: [
               // Username Field
               FormBuilderTextField(
-                name: 'Username:',
+                name: 'username',
                 decoration: const InputDecoration(labelText: 'Username',icon:Icon(Icons.people)),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(),
                   FormBuilderValidators.username(),
                 ]),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 10), 
 
               // Email Field
               FormBuilderTextField(
-                name: 'Email:',
+                name: 'email',
                 decoration: const InputDecoration(labelText: 'Email Address',icon:Icon(Icons.email)),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(),
@@ -83,7 +83,7 @@ class SignupScreenState extends State<SignupScreen> {
 
               // Date of Birth Field
               FormBuilderDateTimePicker(
-                name: 'DOB:',
+                name: 'dob',
                 inputType: InputType.date,
                 decoration: const InputDecoration(labelText: 'Date of Birth',icon:Icon(Icons.calendar_month)),
                 validator: FormBuilderValidators.compose([
@@ -94,7 +94,7 @@ class SignupScreenState extends State<SignupScreen> {
 
               // Password Field
               FormBuilderTextField(
-                name: 'Password:',
+                name: 'password',
                 decoration: const InputDecoration(labelText: 'Password',icon:Icon(Icons.password)),
                 obscureText: true,
                 validator: FormBuilderValidators.compose([
@@ -126,7 +126,7 @@ class ConfirmationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Signup Successful')),
+      appBar: AppBar(title: const Text('Form Validation Demo')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
