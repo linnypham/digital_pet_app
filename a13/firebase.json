@@ -1,1 +1,3 @@
+
 {"flutter":{"platforms":{"android":{"default":{"projectId":"fir-auth-demo-c2bea","appId":"1:95604099882:android:7f58229a805a28815f2c53","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"fir-auth-demo-c2bea","configurations":{"android":"1:95604099882:android:7f58229a805a28815f2c53","ios":"1:95604099882:ios:92e5c0f321186db15f2c53","macos":"1:95604099882:ios:92e5c0f321186db15f2c53","web":"1:95604099882:web:7c3f4fd76f6012b05f2c53","windows":"1:95604099882:web:5be5c455275c84345f2c53"}}}}}}
+
