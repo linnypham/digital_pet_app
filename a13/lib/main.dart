@@ -256,3 +256,81 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
     );
   }
 }
+class ProfileScreen extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void _changePassword(BuildContext context) {
+    final TextEditingController _newPasswordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Change Password'),
+        content: TextField(
+          controller: _newPasswordController,
+          obscureText: true,
+          decoration: InputDecoration(labelText: 'New Password'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              try {
+                await _auth.currentUser!.updatePassword(_newPasswordController.text);
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Password changed successfully')),
+                );
+              } catch (e) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to change password')),
+                );
+              }
+            },
+            child: Text('Change'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _logout(BuildContext context) async {
+    await _auth.signOut();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Firebase Auth Demo')),
+      (route) => false,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = _auth.currentUser;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Profile'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => _logout(context),
+          ),
+        ],
+      ),
+      body: Center(
+        child: user == null
+            ? Text("No user logged in.")
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Email: ${user.email}', style: TextStyle(fontSize: 18)),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => _changePassword(context),
+                    child: Text('Change Password'),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}

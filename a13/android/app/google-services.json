@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "69351585548",
-    "project_id": "fir-authentication-68e7c",
-    "storage_bucket": "fir-authentication-68e7c.firebasestorage.app"
+    "project_number": "716611096395",
+    "project_id": "personal-finance-manager-c4b71",
+    "storage_bucket": "personal-finance-manager-c4b71.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:69351585548:android:fc3c7bc5859596dca0fb29",
+        "mobilesdk_app_id": "1:716611096395:android:d04db3ad3f4834658362ce",
         "android_client_info": {
-          "package_name": "com.example.a13"
+          "package_name": "com.example.financeapp"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAWMWT4uJ9o_Jsto9fqggIqyqf-HOcK1XY"
+          "current_key": "AIzaSyBh4vRqnrgvoLmyR1xhK42OzrGM-ll_T2A"
         }
       ],
       "services": {
