@@ -15,6 +15,8 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
   final String title;
 
   @override
@@ -70,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class RegisterEmailSection extends StatefulWidget {
-  RegisterEmailSection({Key? key, required this.auth}) : super(key: key);
+  const RegisterEmailSection({super.key, required this.auth});
   final FirebaseAuth auth;
 
   @override
@@ -161,7 +163,7 @@ class _RegisterEmailSectionState extends State<RegisterEmailSection> {
 }
 
 class EmailPasswordForm extends StatefulWidget {
-  EmailPasswordForm({Key? key, required this.auth}) : super(key: key);
+  const EmailPasswordForm({super.key, required this.auth});
   final FirebaseAuth auth;
 
   @override
@@ -187,6 +189,9 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
         _userEmail = _emailController.text;
         _initialState = false;
       });
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => ProfileScreen()),
+    );
     } catch (e) {
       setState(() {
         _success = false;
@@ -203,9 +208,9 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            child: Text('Test sign in with email and password'),
             padding: const EdgeInsets.all(16),
             alignment: Alignment.center,
+            child: Text('Test sign in with email and password'),
           ),
           TextFormField(
             controller: _emailController,
@@ -259,15 +264,17 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
 class ProfileScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  const ProfileScreen({super.key});
+
   void _changePassword(BuildContext context) {
-    final TextEditingController _newPasswordController = TextEditingController();
+    final TextEditingController newPasswordController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Change Password'),
         content: TextField(
-          controller: _newPasswordController,
+          controller: newPasswordController,
           obscureText: true,
           decoration: InputDecoration(labelText: 'New Password'),
         ),
@@ -275,7 +282,7 @@ class ProfileScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               try {
-                await _auth.currentUser!.updatePassword(_newPasswordController.text);
+                await _auth.currentUser!.updatePassword(newPasswordController.text);
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Password changed successfully')),
