@@ -175,34 +175,35 @@ class _RegisterEmailSectionState extends State<RegisterEmailSection> {
                   return 'Password must be at least 6 characters';
                 }
                 return null;
-            },
-          ),
-          SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _register,
-              child: Text('Register'),
+              },
             ),
-          ),
-          SizedBox(height: 16),
-          if (_errorMessage != null)
-            Text(
-              _errorMessage!,
-              style: TextStyle(color: Colors.red),
+            SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _register,
+                child: Text('Register'),
+              ),
             ),
-          Container(
-            alignment: Alignment.center,
-            child: Text(
-              _initialState
-                  ? 'Please Register'
-              : _success
-                  ? 'Successfully registered $_userEmail'
-                  : 'Registration failed',
-              style: TextStyle(color: _success ? Colors.green : Colors.red),
+            SizedBox(height: 16),
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.red),
+              ),
+            Container(
+              alignment: Alignment.center,
+              child: Text(
+                _initialState
+                    ? 'Please Register'
+                : _success
+                    ? 'Successfully registered $_userEmail'
+                    : 'Registration failed',
+                style: TextStyle(color: _success ? Colors.green : Colors.red),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
