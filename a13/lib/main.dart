@@ -4,13 +4,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(MyApp());
 }
 
@@ -19,7 +17,26 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Firebase Auth Demo',
-      home: MyHomePage(title: 'Firebase Auth Demo'),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: AuthWrapper(),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return ProfileScreen(user: snapshot.data!);
+        } else {
+          return MyHomePage(title: 'Firebase Auth Demo');
+        }
+      },
     );
   }
 }
@@ -38,15 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _toggleView() {
     setState(() {
-    _showSignIn = !_showSignIn;
+      _showSignIn = !_showSignIn;
     });
-  }
-
-  void _signOut() async {
-    await _auth.signOut();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Signed out successfully'),
-    ));
   }
 
   @override
@@ -54,31 +64,25 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: <Widget>[
-          ElevatedButton(
-            onPressed: () {
-              _signOut();
-            },
-            child: Text('Sign Out'),
-          ),
-        ],
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (!_showSignIn) RegisterEmailSection(auth: _auth),
-            if (_showSignIn) EmailPasswordForm(auth: _auth),
-            TextButton(
-              onPressed: _toggleView,
-              child: Text(
-                _showSignIn
-                  ? 'Need an account? Register'
-                  : 'Already have an account? Sign In',
-                style: TextStyle(color: Colors.blue),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (!_showSignIn) RegisterEmailSection(auth: _auth),
+              if (_showSignIn) EmailPasswordForm(auth: _auth),
+              TextButton(
+                onPressed: _toggleView,
+                child: Text(
+                  _showSignIn 
+                    ? 'Need an account? Register' 
+                    : 'Already have an account? Sign In',
+                  style: TextStyle(color: Colors.blue),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -103,12 +107,12 @@ class _RegisterEmailSectionState extends State<RegisterEmailSection> {
   String? _errorMessage;
 
   bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-]\.)+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   void _register() async {
     if (!_formKey.currentState!.validate()) return;
-
+    
     try {
       await widget.auth.createUserWithEmailAndPassword(
         email: _emailController.text,
@@ -140,7 +144,7 @@ class _RegisterEmailSectionState extends State<RegisterEmailSection> {
           children: <Widget>[
             Text(
               'Register',
-              style: TextStyle(fontSize:24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
             TextFormField(
@@ -150,7 +154,7 @@ class _RegisterEmailSectionState extends State<RegisterEmailSection> {
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
-                if (value?.isEmpty??true) {
+                if (value?.isEmpty ?? true) {
                   return 'Please enter your email';
                 }
                 if (!_isValidEmail(value!)) {
@@ -168,7 +172,7 @@ class _RegisterEmailSectionState extends State<RegisterEmailSection> {
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
-                if(value?.isEmpty??true) {
+                if (value?.isEmpty ?? true) {
                   return 'Please enter your password';
                 }
                 if (value!.length < 6) {
@@ -195,11 +199,12 @@ class _RegisterEmailSectionState extends State<RegisterEmailSection> {
               alignment: Alignment.center,
               child: Text(
                 _initialState
-                    ? 'Please Register'
-                : _success
-                    ? 'Successfully registered $_userEmail'
-                    : 'Registration failed',
-                style: TextStyle(color: _success ? Colors.green : Colors.red),
+                    ? ''
+                    : _success
+                        ? 'Successfully registered $_userEmail'
+                        : 'Registration failed',
+                style: TextStyle(
+                    color: _success ? Colors.green : Colors.red),
               ),
             ),
           ],
@@ -223,7 +228,7 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
   final TextEditingController _passwordController = TextEditingController();
   bool _success = false;
   bool _initialState = true;
-  String _userEmail ='';
+  String _userEmail = '';
   String? _errorMessage;
 
   bool _isValidEmail(String email) {
@@ -232,7 +237,7 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
 
   void _signInWithEmailAndPassword() async {
     if (!_formKey.currentState!.validate()) return;
-
+    
     try {
       await widget.auth.signInWithEmailAndPassword(
         email: _emailController.text,
@@ -255,67 +260,77 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'Sign In',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 20),
-          TextFormField(
-            controller: _emailController,
-            decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
-            validator: (value) {
-              if (value?.isEmpty??true) {
-                return 'Please enter your email';
-              }
-              if (!_isValidEmail(value!)) {
-                return 'Please enter a valid email';
-              }
-              return null;
-            },
-          ),
-          SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            decoration: InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
-            validator: (value) {
-              if (value?.isEmpty??true) {
-                return 'Please enter your password';
-              }
-              return null;
-            },
-          ),
-          SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _signInWithEmailAndPassword,
-              child: Text('Sign In'),
-            ),
-          ),
-          SizedBox(height: 16),
-          if (_errorMessage != null)
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
             Text(
-              _errorMessage!,
-              style: TextStyle(color: Colors.red),
+              'Sign In',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-          Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              _initialState
-                  ? 'Please sign in'
-                  : _success
-                  ? 'Successfully signed in $_userEmail'
-                  : 'Sign in failed',
-              style: TextStyle(color: _success ? Colors.green : Colors.red),
+            SizedBox(height: 20),
+            TextFormField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value?.isEmpty ?? true) {
+                  return 'Please enter your email';
+                }
+                if (!_isValidEmail(value!)) {
+                  return 'Please enter a valid email';
+                }
+                return null;
+              },
             ),
-          ),
-        ],
+            SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value?.isEmpty ?? true) {
+                  return 'Please enter your password';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _signInWithEmailAndPassword,
+                child: Text('Sign In'),
+              ),
+            ),
+            SizedBox(height: 16),
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.red),
+              ),
+            Container(
+              alignment: Alignment.center,
+              child: Text(
+                _initialState
+                    ? ''
+                    : _success
+                        ? 'Successfully signed in $_userEmail'
+                        : 'Sign in failed',
+                style: TextStyle(
+                    color: _success ? Colors.green : Colors.red),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
