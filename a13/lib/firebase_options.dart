@@ -41,49 +41,53 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCm343YTshU0WZA2R06KTf96NUSLhyuNZM',
-    appId: '1:621331339556:web:22410ab22ed3bd7c89bbb1',
-    messagingSenderId: '621331339556',
-    projectId: 'sign-in-4e919',
-    authDomain: 'sign-in-4e919.firebaseapp.com',
-    storageBucket: 'sign-in-4e919.firebasestorage.app',
-    measurementId: 'G-4HRD0NVKJK',
+
+    apiKey: 'AIzaSyAW1niHJyLfzb3ZsxKyDtjXXudXHd4w5lU',
+    appId: '1:95604099882:web:7c3f4fd76f6012b05f2c53',
+    messagingSenderId: '95604099882',
+    projectId: 'fir-auth-demo-c2bea',
+    authDomain: 'fir-auth-demo-c2bea.firebaseapp.com',
+    storageBucket: 'fir-auth-demo-c2bea.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDdF9LJxrOGG2MupJe3FBtqV4VxhzQvLh4',
-    appId: '1:621331339556:android:37a6c0d7178cc9f589bbb1',
-    messagingSenderId: '621331339556',
-    projectId: 'sign-in-4e919',
-    storageBucket: 'sign-in-4e919.firebasestorage.app',
+    apiKey: 'AIzaSyDPfvquIVF9aDhLpX6ceH01Wb6JNtu_8SM',
+    appId: '1:95604099882:android:7f58229a805a28815f2c53',
+    messagingSenderId: '95604099882',
+    projectId: 'fir-auth-demo-c2bea',
+    storageBucket: 'fir-auth-demo-c2bea.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDP60Q_F5HHzAOFVcl2gEViGn7ytcZjgTU',
-    appId: '1:621331339556:ios:cdc109484acd0bba89bbb1',
-    messagingSenderId: '621331339556',
-    projectId: 'sign-in-4e919',
-    storageBucket: 'sign-in-4e919.firebasestorage.app',
+    apiKey: 'AIzaSyCIWWBhY4QAXN4wmILNqMaFcrbOLygMUvE',
+    appId: '1:95604099882:ios:92e5c0f321186db15f2c53',
+    messagingSenderId: '95604099882',
+    projectId: 'fir-auth-demo-c2bea',
+    storageBucket: 'fir-auth-demo-c2bea.firebasestorage.app',
+
     iosBundleId: 'com.example.a13',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDP60Q_F5HHzAOFVcl2gEViGn7ytcZjgTU',
-    appId: '1:621331339556:ios:cdc109484acd0bba89bbb1',
-    messagingSenderId: '621331339556',
-    projectId: 'sign-in-4e919',
-    storageBucket: 'sign-in-4e919.firebasestorage.app',
+
+    apiKey: 'AIzaSyCIWWBhY4QAXN4wmILNqMaFcrbOLygMUvE',
+    appId: '1:95604099882:ios:92e5c0f321186db15f2c53',
+    messagingSenderId: '95604099882',
+    projectId: 'fir-auth-demo-c2bea',
+    storageBucket: 'fir-auth-demo-c2bea.firebasestorage.app',
+
     iosBundleId: 'com.example.a13',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCm343YTshU0WZA2R06KTf96NUSLhyuNZM',
-    appId: '1:621331339556:web:c9d04f62aff77b5889bbb1',
-    messagingSenderId: '621331339556',
-    projectId: 'sign-in-4e919',
-    authDomain: 'sign-in-4e919.firebaseapp.com',
-    storageBucket: 'sign-in-4e919.firebasestorage.app',
-    measurementId: 'G-KWZWCTMFLJ',
+
+    apiKey: 'AIzaSyAW1niHJyLfzb3ZsxKyDtjXXudXHd4w5lU',
+    appId: '1:95604099882:web:5be5c455275c84345f2c53',
+    messagingSenderId: '95604099882',
+    projectId: 'fir-auth-demo-c2bea',
+    authDomain: 'fir-auth-demo-c2bea.firebaseapp.com',
+    storageBucket: 'fir-auth-demo-c2bea.firebasestorage.app',
+
   );
 
 }

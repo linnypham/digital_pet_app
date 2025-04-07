@@ -13,6 +13,8 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -42,7 +44,7 @@ class AuthWrapper extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
   final String title;
 
   @override
@@ -90,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class RegisterEmailSection extends StatefulWidget {
-  RegisterEmailSection({Key? key, required this.auth}) : super(key: key);
+  const RegisterEmailSection({super.key, required this.auth});
   final FirebaseAuth auth;
 
   @override
@@ -215,7 +217,7 @@ class _RegisterEmailSectionState extends State<RegisterEmailSection> {
 }
 
 class EmailPasswordForm extends StatefulWidget {
-  EmailPasswordForm({Key? key, required this.auth}) : super(key: key);
+  const EmailPasswordForm({super.key, required this.auth});
   final FirebaseAuth auth;
 
   @override
@@ -249,7 +251,12 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
         _initialState = false;
         _errorMessage = null;
       });
-    } on FirebaseAuthException catch (e) {
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => ProfileScreen()),
+    );
+    } catch (e) {
+
       setState(() {
         _success = false;
         _initialState = false;
@@ -260,27 +267,45 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Sign In',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value?.isEmpty ?? true) {
-                  return 'Please enter your email';
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            padding: const EdgeInsets.all(16),
+            alignment: Alignment.center,
+            child: Text('Test sign in with email and password'),
+          ),
+          TextFormField(
+            controller: _emailController,
+            decoration: InputDecoration(labelText: 'Email'),
+            validator: (value) {
+              if (value?.isEmpty??true) {
+                return 'Please enter some text';
+              }
+              return null;
+            },
+          ),
+          TextFormField(
+            controller: _passwordController,
+            decoration: InputDecoration(labelText: 'Password'),
+            validator: (value) {
+              if (value?.isEmpty??true) {
+                return 'Please enter some text';
+              }
+              return null;
+            },
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            alignment: Alignment.center,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  _signInWithEmailAndPassword();
+
                 }
                 if (!_isValidEmail(value!)) {
                   return 'Please enter a valid email';
@@ -498,4 +523,86 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
 }
+class ProfileScreen extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  const ProfileScreen({super.key});
+
+  void _changePassword(BuildContext context) {
+    final TextEditingController newPasswordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Change Password'),
+        content: TextField(
+          controller: newPasswordController,
+          obscureText: true,
+          decoration: InputDecoration(labelText: 'New Password'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              try {
+                await _auth.currentUser!.updatePassword(newPasswordController.text);
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Password changed successfully')),
+                );
+              } catch (e) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to change password')),
+                );
+              }
+            },
+            child: Text('Change'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _logout(BuildContext context) async {
+    await _auth.signOut();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Firebase Auth Demo')),
+      (route) => false,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = _auth.currentUser;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Profile'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => _logout(context),
+          ),
+        ],
+      ),
+      body: Center(
+        child: user == null
+            ? Text("No user logged in.")
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Email: ${user.email}', style: TextStyle(fontSize: 18)),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => _changePassword(context),
+                    child: Text('Change Password'),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
