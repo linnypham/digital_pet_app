@@ -28,6 +28,8 @@ class MyApp extends StatelessWidget {
 }
 
 class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -310,7 +312,7 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
                 if (!_isValidEmail(value!)) {
                   return 'Please enter a valid email';
                 }
-                return null;
+                return;
               },
             ),
             SizedBox(height: 16),
@@ -357,14 +359,14 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
           ],
         ),
       ),
-    );
+    )
   }
 }
 
 class ProfileScreen extends StatefulWidget {
   final User user;
 
-  ProfileScreen({Key? key, required this.user}) : super(key: key);
+  const ProfileScreen({super.key, required this.user});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
