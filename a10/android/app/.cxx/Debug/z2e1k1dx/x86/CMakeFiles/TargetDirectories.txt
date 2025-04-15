@@ -1,0 +1,2 @@
+C:/Users/LINNY-T14S/Documents/Github/digital_pet_app/a10/android/app/.cxx/Debug/z2e1k1dx/x86/CMakeFiles/edit_cache.dir
+C:/Users/LINNY-T14S/Documents/Github/digital_pet_app/a10/android/app/.cxx/Debug/z2e1k1dx/x86/CMakeFiles/rebuild_cache.dir
